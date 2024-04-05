@@ -6,15 +6,15 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class Node {
-    private final KeyValuePair keyValuePair;
+    public final String value;
     private final List<Node> next = new ArrayList<>();
     private final ReentrantLock nodeLock = new ReentrantLock();
     private final AtomicBoolean marked = new AtomicBoolean(false);
     private final AtomicBoolean fullyLinked = new AtomicBoolean(false);
     private final int topLevel;
 
-    public Node(int key, String value, int level) {
-        this.keyValuePair = new KeyValuePair(key, value);
+    public Node(String value, int level) {
+        this.value = value;
         for (int i = 0; i <= level; i++) {
             next.add(null);
         }
@@ -51,14 +51,6 @@ public class Node {
 
     public int getTopLevel() {
         return topLevel;
-    }
-
-    public int getKey() {
-        return keyValuePair.getKey();
-    }
-
-    public String getValue() {
-        return keyValuePair.getValue();
     }
 
     public Node getNext(int level) {

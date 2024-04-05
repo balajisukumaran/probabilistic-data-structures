@@ -7,7 +7,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class Bucket {
     private static final int DEFAULT_BUCKET_SIZE = 4;
-    private final List<Byte> bucket;
+    private final List<String> bucket;
     private final ReentrantLock lock = new ReentrantLock();
     private final int capacity = DEFAULT_BUCKET_SIZE;
 
@@ -15,48 +15,46 @@ public class Bucket {
         this.bucket = new ArrayList<>(capacity);
     }
 
-    public boolean insert(byte[] fingerprint) {
+    public boolean insert(String fingerprint) {
         lock.lock();
         try {
             if (bucket.size() >= capacity) {
                 return false;
             }
-            for (byte b : fingerprint) {
-                bucket.add(b);
-            }
+            bucket.add(fingerprint);
         } finally {
             lock.unlock();
         }
         return true;
     }
 
-    public boolean delete(byte[] fingerprint) {
+    public boolean delete(String fingerprint) {
         lock.lock();
         try {
-            return bucket.remove((Byte) fingerprint[0]); // Simplified for single byte fingerprint
+            return bucket.remove(fingerprint);
         } finally {
             lock.unlock();
         }
     }
 
-    public int getFingerprintIndex(byte[] fingerprint) {
-        return bucket.indexOf(fingerprint[0]); // Simplified for single byte fingerprint
+    public int getFingerprintIndex(String fingerprint) {
+        return bucket.indexOf(fingerprint);
     }
 
-    public byte[] swap(byte[] fingerprint) {
+    public String swap(String fingerprint) {
         lock.lock();
         try {
             Random rand = new Random();
             int index = rand.nextInt(bucket.size());
-            byte temp = bucket.get(index);
-            bucket.set(index, fingerprint[0]); // Simplified for single byte fingerprint
-            return new byte[]{temp};
+            String temp = bucket.get(index);
+            bucket.set(index, fingerprint);
+            return temp;
         } finally {
             lock.unlock();
         }
     }
 
-    public boolean contains(byte[] fingerprint) {
+    public boolean contains(String fingerprint) {
         return getFingerprintIndex(fingerprint) > -1;
     }
 }

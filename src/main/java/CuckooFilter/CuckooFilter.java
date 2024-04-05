@@ -1,6 +1,7 @@
 package CuckooFilter;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
@@ -29,10 +30,9 @@ public class CuckooFilter {
         this.messageDigest = MessageDigest.getInstance("SHA-256");
     }
 
-    public boolean insert(Object item) throws IOException {
-        byte[] itemByte = objectToBytes(item);
-        byte[] fp = getFingerprint(itemByte);
-        int i1 = getIndex1(itemByte);
+    public boolean insert(String item) {
+        String fp = getFingerprint(item);
+        int i1 = getIndex1(item);
         int i2 = getIndex2(fp, i1);
 
         lock.lock();
@@ -56,7 +56,7 @@ public class CuckooFilter {
         return false;
     }
 
-    private boolean _insert(byte[] fp, int index) {
+    private boolean _insert(String fp, int index) {
         if (buckets[index].insert(fp)) {
             count++;
             return true;
@@ -73,11 +73,11 @@ public class CuckooFilter {
         return messageDigest.digest();
     }
 
-    private byte[] getFingerprint(byte[] data) {
-        byte[] hash = getHash(data);
-        byte[] fingerprint = new byte[fingerprintSize];
-        System.arraycopy(hash, 0, fingerprint, 0, fingerprintSize);
-        return fingerprint;
+    private String getFingerprint(String data) {
+        String hash = new String(getHash(data.getBytes(StandardCharsets.UTF_8)));
+        // Ensure the fingerprint size does not exceed the hash length
+        int size = Math.min(fingerprintSize, hash.length());
+        return hash.substring(0, size);
     }
 
     public static byte[] objectToBytes(Object obj) throws IOException {
@@ -91,7 +91,13 @@ public class CuckooFilter {
             return bos.toByteArray();
         }
     }
+    private int getIndex1(String data) {
+        return Math.abs(data.hashCode()) % capacity;
+    }
 
+    private int getIndex2(String fingerprint, int index1) {
+        return Math.abs(index1 ^ fingerprint.hashCode()) % capacity;
+    }
     private int getIndex1(byte[] data) {
         return Math.abs(fromBytes(getHash(data))) % capacity;
     }
@@ -100,14 +106,13 @@ public class CuckooFilter {
         return Math.abs(index1 ^ fromBytes(getHash(fingerprint))) % capacity;
     }
 
-    private int getAlternateIndex(byte[] fingerprint, int index) {
+    private int getAlternateIndex(String fingerprint, int index) {
         return getIndex2(fingerprint, index);
     }
 
-    public boolean delete(Object item) {
-        byte[] serializedItem = serialize(item);
-        byte[] fingerprint = getFingerprint(serializedItem);
-        int index1 = getIndex1(serializedItem);
+    public boolean delete(String item) {
+        String fingerprint = getFingerprint(item);
+        int index1 = getIndex1(item);
         int index2 = getAlternateIndex(fingerprint, index1);
 
         lock.lock();
@@ -122,6 +127,7 @@ public class CuckooFilter {
 
         return false;
     }
+
 
     private static byte[] serialize(Object obj) {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -142,11 +148,10 @@ public class CuckooFilter {
         return result;
     }
 
-    public boolean contains(Object item) {
-        byte[] serializedItem = serialize(item);
-        byte[] fingerprint = getFingerprint(serializedItem);
-        int index1 = getIndex1(serializedItem);
-        int index2 = getIndex2(fingerprint, index1);
+    public boolean contains(String item) {
+        String fingerprint = getFingerprint(item);
+        int index1 = getIndex1(item);
+        int index2 = getAlternateIndex(fingerprint, index1);
 
         Bucket bucket1 = this.buckets[index1];
         Bucket bucket2 = this.buckets[index2];
