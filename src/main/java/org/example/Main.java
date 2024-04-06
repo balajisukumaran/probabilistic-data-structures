@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
     public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
 
@@ -26,30 +24,29 @@ public class Main {
 
         long startTime = System.nanoTime();
 
-        switch (dsType){
+        switch (dsType) {
             case "ConcurrentSkipList":
                 SkipList skipList = new SkipList(csvProcessor.lines.size());
 
-                for(int i = 0; i < csvProcessor.lines.size(); i++)
+                for (int i = 0; i < csvProcessor.lines.size(); i++)
                     skipList.add(csvProcessor.lines.get(i));
 
-                if(operation.equals("search")){
-                    for(Integer data : testData)
+                if (operation.equals("search")) {
+                    for (Integer data : testData)
                         skipList.search(csvProcessor.lines.get(data));
-                }
-                else if(operation.equals("delete")){
-                    for(Integer data : testData)
+                } else if (operation.equals("delete")) {
+                    for (Integer data : testData)
                         skipList.remove(csvProcessor.lines.get(data));
                 }
                 break;
 
             case "BloomFiler":
                 BloomFilter<String> bloomFilter = new BloomFilter<String>(csvProcessor.lines.size(), 0.01d);
-                for(int i = 0; i < csvProcessor.lines.size(); i++)
+                for (int i = 0; i < csvProcessor.lines.size(); i++)
                     bloomFilter.add(csvProcessor.lines.get(i));
 
-                if(operation.equals("search")){
-                    for(Integer data : testData)
+                if (operation.equals("search")) {
+                    for (Integer data : testData)
                         bloomFilter.contains(csvProcessor.lines.get(data));
                 }
                 break;
@@ -57,15 +54,14 @@ public class Main {
 
             case "CuckooFiler":
                 CuckooFilter cuckooFilter = new CuckooFilter(csvProcessor.lines.size(), 32);
-                for(int i = 0; i < csvProcessor.lines.size(); i++)
+                for (int i = 0; i < csvProcessor.lines.size(); i++)
                     cuckooFilter.insert(csvProcessor.lines.get(i));
 
-                if(operation.equals("search")){
-                    for(Integer data : testData)
+                if (operation.equals("search")) {
+                    for (Integer data : testData)
                         cuckooFilter.contains(csvProcessor.lines.get(data));
-                }
-                else if(operation.equals("delete")){
-                    for(Integer data : testData)
+                } else if (operation.equals("delete")) {
+                    for (Integer data : testData)
                         cuckooFilter.delete(csvProcessor.lines.get(data));
                 }
                 break;

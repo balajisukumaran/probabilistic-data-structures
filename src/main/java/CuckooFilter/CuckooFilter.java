@@ -7,6 +7,13 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Random;
 import java.util.concurrent.locks.ReentrantLock;
 
+/**
+ * Implements a Cuckoo Filter, a space-efficient probabilistic data structure that is used
+ * to test whether an element is a member of a set. False positive matches are possible, but
+ * false negatives are not. It provides high insertion and query performances with a low
+ * rate of false positives. This class supports operations for adding, deleting, and checking
+ * the presence of elements in the filter.
+ */
 public class CuckooFilter {
     private Bucket[] buckets;
     private int fingerprintSize;
@@ -30,6 +37,14 @@ public class CuckooFilter {
         this.messageDigest = MessageDigest.getInstance("SHA-256");
     }
 
+    /**
+     * Inserts an item into the cuckoo filter. This operation might trigger a series of
+     * rehashing and relocations within the filter's buckets if the initial locations are occupied.
+     *
+     * @param item the item to insert into the filter
+     * @return true if the item was successfully inserted, false if the filter cannot accommodate
+     *         the item without exceeding the maximum load factor
+     */
     public boolean insert(String item) {
         String fp = getFingerprint(item);
         int i1 = getIndex1(item);
@@ -110,6 +125,13 @@ public class CuckooFilter {
         return getIndex2(fingerprint, index);
     }
 
+    /**
+     * Attempts to remove an item from the cuckoo filter. If the item is found and removed,
+     * the method returns true; otherwise, it returns false.
+     *
+     * @param item the item to remove from the filter
+     * @return true if the item was found and removed, false otherwise
+     */
     public boolean delete(String item) {
         String fingerprint = getFingerprint(item);
         int index1 = getIndex1(item);
@@ -148,6 +170,15 @@ public class CuckooFilter {
         return result;
     }
 
+    /**
+     * Checks whether an item is present in the cuckoo filter. Note that due to the probabilistic
+     * nature of the filter, this method may return true for items that have not been inserted,
+     * representing a false positive.
+     *
+     * @param item the item to check for its presence in the filter
+     * @return true if the item is possibly in the filter, false if the item is definitely not in the filter
+     */
+
     public boolean contains(String item) {
         String fingerprint = getFingerprint(item);
         int index1 = getIndex1(item);
@@ -159,6 +190,13 @@ public class CuckooFilter {
         return bucket1.contains(fingerprint) || bucket2.contains(fingerprint);
     }
 
+    /**
+     * Provides a string representation of the cuckoo filter, detailing its structure, contents,
+     * and statistics such as current load. This can be useful for debugging or monitoring the
+     * state of the filter.
+     *
+     * @return a string representation of the cuckoo filter
+     */
     @Override
     public String toString() {
         return "CuckooFilter{" +

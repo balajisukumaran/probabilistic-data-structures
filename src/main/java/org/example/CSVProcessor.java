@@ -8,11 +8,12 @@ import java.util.Collections;
 import java.util.*;
 
 public class CSVProcessor {
-    public HashMap<Integer,String> lines = new HashMap<>();
+    public HashMap<Integer, String> lines = new HashMap<>();
 
     /**
      * Reads a CSV file, trims spaces from each line, and stores them in a list.
      * Skips the first line assuming it's a header.
+     *
      * @param filePath Path to the CSV file.
      * @throws IOException If an I/O error occurs.
      */
@@ -20,13 +21,13 @@ public class CSVProcessor {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             boolean firstLine = true;
-            int i =0;
+            int i = 0;
             while ((line = br.readLine()) != null) {
                 if (firstLine) {
                     firstLine = false;
                     continue;
                 }
-                lines.put(i , line.replace(" ", "")); // Remove spaces and add to the list
+                lines.put(i, line.replace(" ", "")); // Remove spaces and add to the list
                 i++;
             }
         }
@@ -34,6 +35,7 @@ public class CSVProcessor {
 
     /**
      * Returns n random strings from the loaded lines.
+     *
      * @param n The number of strings to return.
      * @return A list of n random strings.
      * @throws IllegalArgumentException If n is greater than the number of available lines.
